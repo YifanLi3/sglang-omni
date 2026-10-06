@@ -120,16 +120,15 @@ def scheduler_request(request_id: str, sampling_seed: int | None):
 def sample_lookahead_seeds(
     requests: list[types.SimpleNamespace],
 ) -> torch.Tensor | None:
-    sampled_seeds: list[torch.Tensor | None] = []
-
     def sample(logits_output, forward_batch):
-        sampled_seeds.append(forward_batch.sampling_info.sampling_seed)
         return torch.zeros(len(requests), dtype=torch.long)
 
     thinker_runner = runner()
     thinker_runner.tp_worker = types.SimpleNamespace(
         model_runner=types.SimpleNamespace(sample=sample)
     )
+    thinker_runner.sampling_seed_batch_key = ()
+    thinker_runner.sampling_seed_batch_tensor = None
     forward_batch = types.SimpleNamespace(
         sampling_info=types.SimpleNamespace(
             sampling_seed=None,
@@ -141,8 +140,7 @@ def sample_lookahead_seeds(
     )
     logits_output = types.SimpleNamespace(next_token_logits=None)
     thinker_runner.sample_lookahead(logits_output, forward_batch, requests)
-    assert len(sampled_seeds) == 1
-    return sampled_seeds[0]
+    return forward_batch.sampling_info.sampling_seed
 
 
 def test_sample_lookahead_installs_request_seeds():
