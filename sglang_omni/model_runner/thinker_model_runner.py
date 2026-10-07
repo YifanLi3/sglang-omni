@@ -561,9 +561,10 @@ class ThinkerModelRunner(ModelRunner):
     ) -> torch.Tensor:
         # note (jiaxin deng): penalties never reach here (lookahead_eligible routes
         # those batches to sync); only static suppress tokens are lag-safe.
-        # Seeds are lag-safe too: the seeded sampler keys on positions, which
-        # prepare_for_decode advances before the previous step resolves.
         self.apply_codec_suppress_tokens(logits_output, requests)
+        # note (YifanLi3): seeds are lag-safe too: the seeded sampler keys on
+        # positions, which prepare_for_decode advances before the previous step
+        # resolves.
         self.install_sampling_seeds(forward_batch, requests)
         return self.tp_worker.model_runner.sample(logits_output, forward_batch)
 

@@ -106,7 +106,9 @@ def test_seeded_batch_is_eligible():
     assert runner().lookahead_eligible(seeded_mix) is True
 
 
-def scheduler_request(request_id: str, sampling_seed: int | None):
+def scheduler_request(
+    request_id: str, sampling_seed: int | None
+) -> types.SimpleNamespace:
     return types.SimpleNamespace(
         request_id=request_id,
         data=types.SimpleNamespace(
@@ -120,7 +122,9 @@ def scheduler_request(request_id: str, sampling_seed: int | None):
 def sample_lookahead_seeds(
     requests: list[types.SimpleNamespace],
 ) -> torch.Tensor | None:
-    def sample(logits_output, forward_batch):
+    def sample(
+        logits_output: types.SimpleNamespace, forward_batch: types.SimpleNamespace
+    ) -> torch.Tensor:
         return torch.zeros(len(requests), dtype=torch.long)
 
     thinker_runner = runner()
